@@ -37,8 +37,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto py-12 px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="flex-1 max-w-6xl mx-auto py-12 px-4 w-full">
         <header className="mb-12 text-center">
           <h1 className="text-4xl font-bold text-gray-900">SplitBill</h1>
           <p className="text-gray-600 mt-2 text-lg">
@@ -64,11 +64,45 @@ function App() {
             />
           )}
         </main>
-
-        <footer className="mt-16 text-center text-sm text-gray-500">
-          <p>Phase 1: Core Functionality</p>
-        </footer>
       </div>
+
+      <footer className="border-t border-gray-200 bg-white mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            {/* Left: Copyright */}
+            <div className="text-sm text-gray-600">
+              © {new Date().getFullYear()} SplitBill. All rights reserved.
+            </div>
+
+            {/* Center: Links */}
+            <div className="flex gap-6 text-sm">
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Terms of Service
+              </a>
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Contact
+              </a>
+            </div>
+
+            {/* Right: Made with */}
+            <div className="text-sm text-gray-600">
+              Made with ♥ for easy bill splitting
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
