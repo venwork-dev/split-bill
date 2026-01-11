@@ -7,7 +7,7 @@
  */
 export interface LineItem {
   lineNumber: string; // e.g., "214.957.3190"
-  total: number; // Total cost for this line (rightmost column in Monthly charges table)
+  total: number; // Total cost for this line
 }
 
 /**
