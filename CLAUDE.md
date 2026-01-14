@@ -1,106 +1,97 @@
+# SplitBill - Agent Guide
 
-Default to using Bun instead of Node.js.
+## Project Overview
+Web app that parses AT&T phone bills (PDF) and splits charges by line with intelligent grouping. Users can create groups, manage lines, and view statistics.
 
-- Use `bun <file>` instead of `node <file>` or `ts-node <file>`
-- Use `bun test` instead of `jest` or `vitest`
-- Use `bun build <file.html|file.ts|file.css>` instead of `webpack` or `esbuild`
-- Use `bun install` instead of `npm install` or `yarn install` or `pnpm install`
-- Use `bun run <script>` instead of `npm run <script>` or `yarn run <script>` or `pnpm run <script>`
-- Use `bunx <package> <command>` instead of `npx <package> <command>`
-- Bun automatically loads .env, so don't use dotenv.
-
-## APIs
-
-- `Bun.serve()` supports WebSockets, HTTPS, and routes. Don't use `express`.
-- `bun:sqlite` for SQLite. Don't use `better-sqlite3`.
-- `Bun.redis` for Redis. Don't use `ioredis`.
-- `Bun.sql` for Postgres. Don't use `pg` or `postgres.js`.
-- `WebSocket` is built-in. Don't use `ws`.
-- Prefer `Bun.file` over `node:fs`'s readFile/writeFile
-- Bun.$`ls` instead of execa.
-
-## Testing
-
-Use `bun test` to run tests.
-
-```ts#index.test.ts
-import { test, expect } from "bun:test";
-
-test("hello world", () => {
-  expect(1).toBe(1);
-});
+## Repository Structure
+```
+split-bill/
+├── frontend/     # React app - see frontend/CLAUDE.md
+├── backend/      # Express API - see backend/CLAUDE.md
+└── test-scripts/ # Parser verification
 ```
 
-## Frontend
+## Tech Stack
+- **Runtime**: Bun (preferred) or Node.js
+- **Frontend**: React 19 + TypeScript + Vite + TailwindCSS + Zustand
+- **Backend**: Express + LlamaParse + OpenAI GPT-4o-mini
 
-Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
-
-Server:
-
-```ts#index.ts
-import index from "./index.html"
-
-Bun.serve({
-  routes: {
-    "/": index,
-    "/api/users/:id": {
-      GET: (req) => {
-        return new Response(JSON.stringify({ id: req.params.id }));
-      },
-    },
-  },
-  // optional websocket support
-  websocket: {
-    open: (ws) => {
-      ws.send("Hello, world!");
-    },
-    message: (ws, message) => {
-      ws.send(message);
-    },
-    close: (ws) => {
-      // handle close
-    }
-  },
-  development: {
-    hmr: true,
-    console: true,
-  }
-})
+## Bun Commands (Use These!)
+```bash
+bun install           # Install dependencies
+bun run dev          # Run development server
+bun run build        # Production build
+bun test             # Run tests
+bun <file>           # Execute file directly
+bunx <package>       # Run package (like npx)
 ```
 
-HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
+## Project Commands
+```bash
+# Frontend (runs on http://localhost:5173)
+cd frontend && bun run dev
 
-```html#index.html
-<html>
-  <body>
-    <h1>Hello, world!</h1>
-    <script type="module" src="./frontend.tsx"></script>
-  </body>
-</html>
+# Backend (runs on http://localhost:3001)
+cd backend && bun run dev
+
+# Type checking
+cd frontend && bun run type-check
 ```
 
-With the following `frontend.tsx`:
+## Key Architecture Points
 
-```tsx#frontend.tsx
-import React from "react";
-import { createRoot } from "react-dom/client";
+### State Management
+- **Zustand** for global state (groups)
+- Store location: `frontend/src/stores/groupStore.ts`
+- Persisted to localStorage with key: `splitbill-groups`
 
-// import .css files directly and it works
-import './index.css';
+### API Communication
+- Frontend → Backend: `http://localhost:3001/api/extract`
+- Backend uses LlamaParse to extract text, OpenAI to structure data
 
-const root = createRoot(document.body);
+### Grouping Feature
+- Lines can be organized into custom groups
+- Groups have: id, name, lineNumbers[], color
+- Full CRUD operations available
+- See `GROUPING_FEATURE.md` for details
 
-export default function Frontend() {
-  return <h1>Hello, world!</h1>;
-}
+## Important Files
+- `frontend/src/stores/groupStore.ts` - State management
+- `frontend/src/components/ResultsTable.tsx` - Line selection & group creation
+- `frontend/src/components/GroupsView.tsx` - Group management UI
+- `backend/server.js` - API server
+- `backend/llamaparse_agent.js` - PDF parsing logic
 
-root.render(<Frontend />);
-```
+## Development Notes
+- ✅ Use Bun commands (not npm/node)
+- ✅ Frontend uses Vite (not Bun.serve in this project)
+- ✅ Backend uses Express (Node.js style API)
+- ✅ Never commit `.env` files
+- ✅ Types checked with TypeScript
+- ✅ Bun automatically loads .env
 
-Then, run index.ts
+## Common Tasks
 
-```sh
-bun --hot ./index.ts
-```
+**Add new UI component:**
+1. Create in `frontend/src/components/`
+2. Use existing shadcn/ui patterns
+3. Import from `@/components/ui/`
 
-For more information, read the Bun API docs in `node_modules/bun-types/docs/**.mdx`.
+**Modify groups logic:**
+1. Update `frontend/src/stores/groupStore.ts`
+2. No backend changes needed (all client-side)
+
+**Change PDF parsing:**
+1. Edit `backend/llamaparse_agent.js`
+2. Test with `cd test-scripts && bun test`
+
+**Update API endpoint:**
+1. Edit `backend/server.js`
+2. Update `frontend/src/utils/parsePDF.ts` if response format changes
+
+## See Also
+- `README.md` - Full project documentation
+- `frontend/README.md` - Frontend details
+- `backend/README.md` - Backend API docs
+- `GROUPING_FEATURE.md` - Technical feature docs
+- `USAGE_GUIDE.md` - User guide

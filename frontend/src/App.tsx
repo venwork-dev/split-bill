@@ -103,26 +103,9 @@ function App() {
               © {new Date().getFullYear()} SplitBill. All rights reserved.
             </div>
 
-            {/* Center: Links */}
-            <div className="flex gap-6 text-sm">
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Terms of Service
-              </a>
-              <a
-                href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Contact
-              </a>
+            {/* Center: Info */}
+            <div className="text-sm text-gray-500">
+              Supports AT&T bills • T-Mobile & Verizon coming soon
             </div>
 
             {/* Right: Made with */}

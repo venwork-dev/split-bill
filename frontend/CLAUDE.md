@@ -1,313 +1,180 @@
-# CLAUDE.md
+# Frontend - Agent Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Overview
+React 19 + TypeScript + Vite frontend for SplitBill. Allows users to upload AT&T bills, view parsed lines, and create intelligent groups.
 
-## Project Overview
+## Tech Stack
+- **Framework**: React 19.2 with TypeScript 5.9
+- **Build Tool**: Vite 7.3
+- **Styling**: TailwindCSS 4.1
+- **State**: Zustand 5.0 (global state) + React hooks (local state)
+- **UI Library**: Radix UI + shadcn/ui components
+- **Icons**: Lucide React
+- **Runtime**: Bun (preferred) or Node.js
 
-**SplitBill** is a web app that automates splitting AT&T phone bills among multiple line users. Users upload AT&T PDF bills, the app parses them, calculates what each person owes, and generates messages to send.
-
-**Current Status:** Phase 1 - Basic React + Vite + TypeScript + Tailwind CSS setup complete. Core functionality (upload, parse, results display) not yet implemented.
-
-## Commands
-
-### Development
+## Commands (Use Bun!)
 ```bash
-pnpm dev          # Start dev server
-pnpm build        # Type check with tsc, then build for production
-pnpm preview      # Preview production build locally
+bun install       # Install dependencies
+bun run dev       # Start dev server (http://localhost:5173)
+bun run build     # Production build
+bun run preview   # Preview production build
+bun run type-check # TypeScript validation
 ```
 
-### Package Manager
-This project uses **pnpm** (version 10.28.0). Always use `pnpm` instead of npm or yarn.
+## Key Files & Directories
+
+### State Management
+- `src/stores/groupStore.ts` - Zustand store for groups (persisted to localStorage)
+
+### Components
+- `src/components/UploadZone.tsx` - PDF upload interface
+- `src/components/ResultsTable.tsx` - All lines view with selection & group creation
+- `src/components/GroupsView.tsx` - Group management with statistics
+- `src/components/ui/` - Reusable shadcn/ui components
+
+### Utils
+- `src/utils/parsePDF.ts` - API communication for PDF parsing
+
+### Types
+- `src/types/bill.types.ts` - TypeScript interfaces (LineItem, ParsedBill, Group)
 
 ## Architecture
 
-### Tech Stack
-- **Frontend:** React 19 + Vite 7 + TypeScript + Tailwind CSS 4
-- **PDF Processing:** Client-side only (browser-based), planning to use `pdf-parse` or `pdfjs-dist`
-- **Deployment Target:** Vercel or Netlify
-
-### Planned Directory Structure
+### Data Flow
 ```
-src/
-├── components/
-│   ├── UploadZone.tsx        # Drag-drop PDF upload UI
-│   ├── BillParser.tsx        # Parsing logic component wrapper
-│   └── ResultsTable.tsx      # Display parsed results in table
-├── utils/
-│   └── parsePDF.ts           # PDF parsing functions for AT&T bills
-├── types/
-│   └── bill.types.ts         # TypeScript interfaces for bill data
-├── App.tsx                   # Main app component
-└── main.tsx                  # Entry point
+User uploads PDF
+    ↓
+parsePDF() → Backend API
+    ↓
+Backend returns: { lines, total_amount }
+    ↓
+Display in ResultsTable (All Lines tab)
+    ↓
+User selects lines → Create Group
+    ↓
+Zustand store (persists to localStorage)
+    ↓
+GroupsView displays groups
 ```
 
-### Key Design Patterns
-- **Client-side processing:** All PDF parsing happens in the browser (no backend in Phase 1)
-- **TypeScript strict mode:** Enabled for type safety in parsing logic
-- **Component isolation:** Upload, parsing, and results display are separate components
+### State Management
+- **Global (Zustand)**: Groups data
+  - Persisted to localStorage: `splitbill-groups`
+  - Actions: createGroup, updateGroup, deleteGroup, etc.
+- **Local (useState)**: Component-specific state (selection, dialogs, expanded groups)
+
+### Styling Approach
+- TailwindCSS utility classes
+- No custom CSS files
+- Design system: grays/blacks with accent colors
+- Responsive: mobile-first approach
+
+## Component Patterns
+
+### UI Components (shadcn/ui)
+Located in `src/components/ui/`:
+- `button.tsx` - Variants: default, destructive, outline, ghost
+- `card.tsx` - Container with header/content
+- `checkbox.tsx` - For line selection
+- `dialog.tsx` - Modals for create/delete confirmations
+- `input.tsx` - Text input fields
+- `table.tsx` - Unused (custom table in ResultsTable)
+
+### Import Aliases
+```typescript
+import { Button } from '@/components/ui/button';
+import { useGroupStore } from '@/stores/groupStore';
+import type { ParsedBill } from '@/types/bill.types';
+```
+
+## Zustand Store API
+
+```typescript
+// Usage in components
+const groups = useGroupStore((state) => state.groups);
+const createGroup = useGroupStore((state) => state.createGroup);
+
+// Available actions
+createGroup(name, lineNumbers) // Returns Group
+updateGroup(id, updates)
+deleteGroup(id)
+addLinesToGroup(groupId, lineNumbers)
+removeLinesFromGroup(groupId, lineNumbers)
+getGroupedLineNumbers() // Returns Set<string>
+getGroupForLine(lineNumber) // Returns Group | undefined
+```
 
 ## Development Guidelines
 
-### Error-Free Development Protocol
-**CRITICAL:** Before moving to the next component or file, ensure the current component is completely error-free.
+### Adding a New Component
+1. Create in `src/components/` or `src/components/ui/`
+2. Use TypeScript with proper interfaces
+3. Follow existing patterns (props interface, formatCurrency, etc.)
+4. Test with `bun run type-check`
 
-**Process:**
-1. Write the component/file
-2. Run `pnpm dev` or check for TypeScript errors
-3. Fix ALL errors (type errors, import errors, syntax errors)
-4. Verify the component compiles successfully
-5. Only then move to the next component
+### Modifying Groups Logic
+1. Edit `src/stores/groupStore.ts`
+2. Changes auto-persist to localStorage
+3. All components auto-update (Zustand reactivity)
 
-**Why this matters:**
-- Prevents cascading errors that compound as you build
-- Easier to debug when you know previous components work
-- Maintains clean commit history
-- Avoids technical debt accumulation
+### Updating UI Styles
+1. Use TailwindCSS classes
+2. Match existing color scheme (grays/blacks, blue accents)
+3. Maintain responsive design patterns
 
-**What counts as "error-free":**
-- No TypeScript type errors
-- No import/module resolution errors
-- No syntax errors
-- Component compiles and renders (even if functionality isn't complete)
-- All dependencies are properly installed
+### API Changes
+1. Update `src/utils/parsePDF.ts` if backend response changes
+2. Update `src/types/bill.types.ts` if data structure changes
 
-**When to check:**
-- After creating each new component
-- After creating utility files
-- After creating type definitions
-- Before wiring components together in parent components
+## Important Notes
+- **Bun preferred**: Use `bun` commands, not `npm`
+- **No backend code here**: Backend is in `../backend/`
+- **localStorage key**: `splitbill-groups` (don't change)
+- **API endpoint**: Hardcoded to `http://localhost:3001/api/extract`
+- **Type safety**: All files use TypeScript strict mode
+- **No emojis**: Unless user explicitly requests them
 
-## Phase 1 Requirements
+## Common Tasks
 
-Current phase focuses on core functionality:
-1. PDF upload interface (drag-drop or click to upload)
-2. Parse AT&T bill PDFs to extract:
-   - Line numbers and individual charges
-   - Per-line costs
-   - Total bill amount
-3. Display parsed data in a clean table format
+### Add new group action
+1. Add method to `groupStore.ts`
+2. Use in components via `useGroupStore`
 
-### What's NOT in Phase 1
-- User accounts/authentication
-- Saving bill history
-- Automated message sending
-- Multiple carrier support
-- Payment tracking
+### Create new UI component
+1. Follow shadcn/ui patterns in `components/ui/`
+2. Export from component file
+3. Import with `@/components/ui/` alias
 
-## Design Philosophy
+### Update line display
+1. Edit `ResultsTable.tsx` or `GroupsView.tsx`
+2. Both components receive `ParsedBill` as prop
 
-**Style:** Clean, professional, minimal - "internal tool" aesthetic
-**Visual Direction:** Blacks, grays, one accent color. Clear typography, good spacing, focus on functionality
-**Avoid:** Gradients, excessive animations, flashy startup-style designs
+### Change color scheme
+1. Update group colors in `groupStore.ts` (`GROUP_COLORS`)
+2. Update TailwindCSS classes in components
 
-## TypeScript Configuration
+## Testing
+- **Type checking**: `bun run type-check`
+- **Dev server**: `bun run dev` (check console for errors)
+- **Build**: `bun run build` (catches production issues)
 
-- Strict mode enabled
-- `noUnusedLocals` and `noUnusedParameters` enforced
-- Target: ES2020 with DOM libraries
-- JSX: react-jsx (React 17+ transform)
+## Troubleshooting
 
-## Development Phases & Roadmap
+**"Module not found"**
+- Run `bun install`
+- Check import aliases (`@/` should resolve to `src/`)
 
-### Phase 1: Core Functionality - Upload & Parse (Current)
-**Status:** Setup complete, implementation pending
+**Groups not persisting**
+- Check localStorage in browser DevTools
+- Key: `splitbill-groups`
+- Clear and recreate if corrupted
 
-**Goals:**
-- Create PDF upload interface with drag-drop
-- Implement AT&T bill PDF parsing (extract line numbers, charges, totals)
-- Display results in clean table format
-- Validate with at least one AT&T bill format
+**Type errors**
+- Run `bun run type-check`
+- Fix imports and type definitions
+- Ensure all props have interfaces
 
-**Implementation Steps:**
-1. Install PDF parsing library (`pdf-parse` or `pdfjs-dist`)
-2. Create `UploadZone.tsx` component with drag-drop functionality
-3. Create `types/bill.types.ts` with TypeScript interfaces:
-   - `LineItem` (number, charges, fees)
-   - `BillData` (total, lines, taxes, fees)
-   - `ParsedBill` (complete bill structure)
-4. Implement `utils/parsePDF.ts`:
-   - Extract text from PDF
-   - Parse AT&T-specific format patterns
-   - Calculate per-line costs
-   - Handle edge cases (shared charges, taxes, fees)
-5. Create `ResultsTable.tsx` to display parsed data
-6. Wire components together in `App.tsx`
-7. Test with sample AT&T PDF bills
-
-**Success Criteria:**
-- Upload PDF ✓
-- Extract line numbers and charges ✓
-- Calculate split amounts ✓
-- Display in clean UI ✓
-
----
-
-### Phase 2: Message Generation & Customization
-**Status:** Not started
-
-**Goals:**
-- Generate copy-paste messages for each line user
-- Allow customization of message templates
-- Support multiple message formats (SMS, email, Venmo request text)
-
-**Implementation Steps:**
-1. Create `components/MessageGenerator.tsx`
-2. Design message templates:
-   - SMS format: "Hi {name}, your share for this month is ${amount}. Line {lineNumber}."
-   - Venmo format: "{month} phone bill - Line {lineNumber}"
-   - Email format with more details
-3. Add template editor UI
-4. Save user preferences to localStorage
-5. Add copy-to-clipboard functionality for each message
-
-**Technical Considerations:**
-- Message templates should support variables: {name}, {amount}, {lineNumber}, {month}, {year}
-- Need state management for template customization (Context API or Zustand)
-
----
-
-### Phase 3: Contact & Line Management
-**Status:** Not started
-
-**Goals:**
-- Save line number to contact name mappings
-- Persist contact data across sessions
-- Edit/update contact information
-
-**Implementation Steps:**
-1. Create `types/contact.types.ts`
-2. Implement `utils/storage.ts` for localStorage operations
-3. Create `components/ContactManager.tsx`:
-   - Form to map line numbers to names
-   - Display saved contacts
-   - Edit/delete functionality
-4. Integrate contact names into message generation
-5. Add import/export functionality for contact data (JSON)
-
-**Data Structure:**
-```typescript
-interface Contact {
-  id: string
-  name: string
-  lineNumber: string
-  email?: string
-  phone?: string
-  venmoHandle?: string
-}
-```
-
----
-
-### Phase 4: Payment Tracking (Optional)
-**Status:** Not started
-
-**Goals:**
-- Track who has paid for each billing period
-- Mark payments as received
-- View payment history
-
-**Implementation Steps:**
-1. Extend bill data model to include payment status
-2. Create `components/PaymentTracker.tsx`
-3. Add payment status indicators (paid/pending)
-4. Implement payment history view
-5. Export payment reports
-
-**Considerations:**
-- This requires data persistence beyond localStorage (consider IndexedDB or backend)
-- Privacy: ensure sensitive payment data is handled appropriately
-
----
-
-### Phase 5: SMS Automation via Twilio (Advanced)
-**Status:** Not started, requires backend
-
-**Goals:**
-- Send SMS messages automatically to line users
-- Integrate Twilio API for messaging
-
-**Prerequisites:**
-- Backend API (Node.js/Express or serverless functions)
-- Twilio account and phone number
-- Environment variable management
-
-**Implementation Steps:**
-1. Set up backend API:
-   - Create `/api/send-message` endpoint
-   - Integrate Twilio SDK
-   - Handle authentication/authorization
-2. Update frontend to call backend API
-3. Add SMS sending UI with confirmation
-4. Implement rate limiting and error handling
-5. Add message delivery status tracking
-
-**Security Considerations:**
-- API key management (never expose Twilio credentials in frontend)
-- Input validation and sanitization
-- Rate limiting to prevent abuse
-- User consent for automated messaging
-
----
-
-### Phase 6: Multi-Carrier Support (Future)
-**Status:** Not planned yet
-
-**Goals:**
-- Support Verizon, T-Mobile, and other carriers
-- Abstract parsing logic to handle different bill formats
-
-**Considerations:**
-- Each carrier has different PDF formats
-- May need different parsing strategies per carrier
-- Could use AI/LLM for more flexible parsing
-
----
-
-## Immediate Next Steps
-
-**To continue from current state:**
-
-1. **Install PDF parsing library**
-   ```bash
-   pnpm add pdf-parse
-   # OR
-   pnpm add pdfjs-dist
-   ```
-
-2. **Create type definitions** (`src/types/bill.types.ts`)
-
-3. **Build UploadZone component** with drag-drop file handling
-
-4. **Implement PDF parsing utility** (`src/utils/parsePDF.ts`)
-
-5. **Create ResultsTable component** to display parsed bill data
-
-6. **Test with real AT&T PDF bills** and iterate on parsing logic
-
----
-
-## Technical Debt & Considerations
-
-- **PDF Parsing Reliability:** AT&T may change bill formats; parsing logic may need updates
-- **Error Handling:** Need robust error handling for malformed PDFs or unexpected formats
-- **Performance:** Large PDF files may cause browser performance issues
-- **Mobile Support:** Ensure responsive design works on mobile devices (though desktop is primary target)
-- **Accessibility:** Add ARIA labels, keyboard navigation, screen reader support
-
----
-
-## Testing Strategy
-
-**Phase 1 Testing:**
-- Unit tests for parsing functions (with sample bill data)
-- Integration tests for upload → parse → display flow
-- Manual testing with various AT&T bill formats
-- Edge case testing (multi-page bills, unusual line configurations)
-
-**Future Testing:**
-- E2E tests with Playwright or Cypress
-- Visual regression testing for UI components
-- Load testing for PDF processing performance
-
----
+## See Also
+- `../README.md` - Project overview
+- `../GROUPING_FEATURE.md` - Technical grouping docs
+- `../USAGE_GUIDE.md` - User guide
