@@ -1,7 +1,7 @@
 {
-  "name": "split-bill",
+  "name": "phone-bill-parser-frontend",
   "version": "1.0.0",
-  "description": "AT&T bill splitter app",
+  "description": "Frontend for Phone Bill Parser",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,11 +18,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
-    "pdfjs-dist": "^5.4.530",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",

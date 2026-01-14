@@ -1,183 +1,218 @@
-# Phone Bill Parser
+# 💰 SplitBill
 
-A web application to parse phone bills and extract line items with charges using LlamaParse and OpenAI.
+> Automatically parse and split AT&T phone bills with intelligent line grouping
 
-## Project Structure
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.3-000000?logo=bun&logoColor=white)](https://bun.sh/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4.1-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Zustand](https://img.shields.io/badge/Zustand-5.0-000000)](https://zustand-demo.pmnd.rs/)
+
+A modern web application that parses AT&T phone bills (PDF) and splits charges by line with intelligent grouping capabilities. Perfect for families, roommates, or businesses sharing phone plans.
+
+## ✨ Features
+
+- 📄 **Smart PDF Parsing** - Upload AT&T bills and extract line items automatically
+- 👥 **Intelligent Grouping** - Organize phone lines into custom groups (Family, Work, etc.)
+- 💵 **Automatic Calculations** - See totals per line and per group
+- 🎨 **Beautiful UI** - Modern, responsive interface with color-coded groups
+- 💾 **Persistent Storage** - Groups saved locally, survives page refreshes
+- 📊 **Statistics Dashboard** - View insights like largest group, most expensive group
+- ⚡ **Fast** - Built with Bun and Vite for lightning-fast performance
+
+## 🚀 Coming Soon
+
+- 📱 **T-Mobile Support** - Parse T-Mobile bills
+- 📱 **Verizon Support** - Parse Verizon bills
+- 📤 **Export Options** - Download group summaries as CSV/PDF
+- 🔗 **Shareable Links** - Generate links to share group totals
+- 📈 **Historical Tracking** - Compare expenses across multiple bills
+
+## 🏗️ Architecture
 
 ```
-phone-bill-parser/
-├── test-scripts/       # Verification script to test parsing quality
-│   ├── verify-parser.js
-│   ├── package.json
-│   └── .env.example
-├── backend/           # Express API server
-│   ├── server.js
-│   ├── package.json
-│   └── .env.example
-├── frontend/          # React UI (to be migrated)
-└── README.md
+split-bill/
+├── frontend/          # React + TypeScript + Vite
+│   ├── src/
+│   │   ├── components/   # UI components
+│   │   ├── stores/       # Zustand state management
+│   │   ├── utils/        # PDF parsing utilities
+│   │   └── types/        # TypeScript definitions
+│   └── README.md
+│
+├── backend/           # Node.js + Express + LlamaParse
+│   ├── server.js (llamaparse_agent)
+│   └── README.md
 ```
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Backend:** Node.js + Express + LlamaParse + OpenAI
-- **Frontend:** React (existing UI)
-- **Runtime:** Node.js or Bun (your choice)
+### Frontend
+- **Framework:** React 19.2 with TypeScript
+- **Build Tool:** Vite 7.3
+- **Styling:** TailwindCSS 4.1
+- **State Management:** Zustand 5.0
+- **UI Components:** Radix UI + shadcn/ui
+- **Icons:** Lucide React
+- **Runtime:** Bun (recommended) or Node.js
 
-## Getting Started
+### Backend
+- **Runtime:** Node.js 22+ or Bun
+- **Framework:** Express
+- **PDF Parser:** LlamaParse (by LlamaIndex)
+- **AI Processing:** OpenAI GPT-4o-mini
+- **File Upload:** Multer
 
-### Step 1: Verify Parser Quality (CRITICAL FIRST STEP)
+## 📦 Installation
 
-Before building the full application, verify that LlamaParse works with your phone bills.
+### Prerequisites
+- Bun 1.3+ (recommended) or Node.js 22+
+- API Keys:
+  - [LlamaCloud API Key](https://cloud.llamaindex.ai)
 
-```bash
-# 1. Navigate to test scripts
-cd test-scripts
+### Quick Start
 
-# 2. Install dependencies (choose one)
-npm install
-# or
-bun install
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd split-bill
+   ```
 
-# 3. Set up API key
-cp .env.example .env
-# Edit .env and add your LLAMA_CLOUD_API_KEY from https://cloud.llamaindex.ai
+2. **Set up Backend**
+   ```bash
+   cd backend
+   bun install
+   cp .env.example .env
+   # Edit .env and add your API keys
+   mkdir temp
+   bun run dev
+   ```
+   Backend runs on `http://localhost:3001`
 
-# 4. Copy your phone bill PDF to test-scripts/ folder
+3. **Set up Frontend** (in a new terminal)
+   ```bash
+   cd frontend
+   bun install
+   bun run dev
+   ```
+   Frontend runs on `http://localhost:5173`
 
-# 5. Run verification
-npm test
-# or
-bun test
+4. **Open in browser**
+   Navigate to `http://localhost:5173`
+
+## 📖 Usage
+
+### 1. Upload Your Bill
+- Click "Upload Another Bill" or drag & drop your AT&T PDF bill
+- Wait for automatic parsing (usually 5-10 seconds)
+
+### 2. View All Lines
+- See all phone lines with holder names and amounts
+- Lines displayed with phone numbers and individual charges
+
+### 3. Create Groups
+- Select lines using checkboxes
+- Click "Create Group" button
+- Name your group (e.g., "Family Plan", "Work Lines")
+- View group in the "Groups" tab
+
+### 4. Manage Groups
+- Switch to "Groups" tab
+- View statistics: Total Groups, Largest Group, Most Expensive
+- **Edit**: Click ✏️ to rename groups
+- **Delete**: Click 🗑️ to remove groups
+- **Remove Lines**: Hover over line and click trash icon
+
+## 🔑 Environment Variables
+
+### Backend (.env)
+```env
+LLAMA_CLOUD_API_KEY=your_llamacloud_key
+OPENAI_API_KEY=your_openai_key
+PORT=3001
 ```
 
-**What to check in the output:**
-- ✅ Are phone numbers correctly extracted?
-- ✅ Are dollar amounts accurate?
-- ✅ Is the text structure preserved?
-- ✅ Compare with your current pdf-parse results
+### Frontend
+No environment variables required (API URL is hardcoded to localhost)
 
-Review `llamaparse_output.txt` for full details.
+## 💰 Cost Estimate
 
-### Step 2: Run Backend API (After verification passes)
+For typical usage (1-2 bills per month):
+- **LlamaParse:** Free (1,000 pages/day limit)
+- **Total:** ~$0.02-0.04/month
 
-```bash
-# 1. Navigate to backend
-cd backend
-
-# 2. Install dependencies
-npm install
-# or
-bun install
-
-# 3. Set up environment variables
-cp .env.example .env
-# Add both LLAMA_CLOUD_API_KEY and OPENAI_API_KEY
-
-# 4. Create temp directory
-mkdir temp
-
-# 5. Start server
-npm run dev
-# or
-bun run dev
-```
-
-API will run on `http://localhost:5000`
-
-**Endpoints:**
-- `GET /api/health` - Health check
-- `POST /api/parse-phone-bill` - Upload PDF and get parsed data
-
-### Step 3: Integrate with React UI
-
-Your existing React UI just needs to call the backend API:
-
-```javascript
-const handleUpload = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch('http://localhost:5000/api/parse-phone-bill', {
-    method: 'POST',
-    body: formData,
-  });
-
-  const billData = await response.json();
-  // billData contains: { account_holder, billing_period, total_amount, lines: [...] }
-};
-```
-
-## Cost Estimate (1-2 uses per month)
-
-- **LlamaParse:** Free (1,000 pages/day)
-- **OpenAI GPT-4o-mini:** ~$0.01/month
-- **Total:** ~$0.01/month
-
-## API Response Format
+## 📊 API Response Format
 
 ```json
 {
-  "account_holder": "John Doe",
-  "billing_period": "Jan 1 - Jan 31, 2026",
-  "total_amount": 650.22,
+  "total_amount": 674.12,
+  "line_count": 11,
   "lines": [
     {
-      "phone_number": "913.725.0726",
-      "line_name": "Primary Line",
-      "amount_owed": 41.07,
-      "plan_name": "Unlimited Plus"
-    },
-    {
-      "phone_number": "302.310.7589",
-      "line_name": "Line 2",
-      "amount_owed": 53.14,
-      "plan_name": "Basic Plan"
+      "phone_number": "111.222.3333",
+      "line_name": "John Doe",
+      "amount_owed": 53.14
     }
   ]
 }
 ```
 
-## Development Tips
+## 🧪 Development
 
-### Using Bun (Faster Alternative to Node)
-
+### Frontend Development
 ```bash
-# Install Bun
-curl -fsSL https://bun.sh/install | bash
-
-# Use bun instead of npm
-bun install
-bun run dev
-bun test
+cd frontend
+bun run dev        # Start dev server
+bun run build      # Production build
+bun run preview    # Preview production build
+bun run type-check # TypeScript validation
 ```
 
-### Debugging
+### Backend Development
+```bash
+cd backend
+bun run dev        # Start with hot reload
+bun run start      # Start production server
+```
 
-- Check `console.log` output in backend terminal
-- Inspect `llamaparse_output.txt` for parsing issues
-- Use `verbose: true` in LlamaParseReader for detailed logs
+### Testing Parser Quality
+```bash
+cd test-scripts
+bun install
+cp .env.example .env
+# Add your LLAMA_CLOUD_API_KEY
+bun test
+# Review llamaparse_output.txt
+```
 
-## Common Issues
+## 📚 Documentation
 
-**"LLAMA_CLOUD_API_KEY not found"**
-- Make sure `.env` file exists (not `.env.example`)
-- Copy the key correctly from https://cloud.llamaindex.ai
+- [Frontend README](./frontend/README.md) - Frontend architecture and components
+- [Backend README](./backend/README.md) - API endpoints and parsing logic
+- [Grouping Feature](./GROUPING_FEATURE.md) - Technical details of grouping feature
+- [Usage Guide](./USAGE_GUIDE.md) - Detailed user guide with examples
 
-**"No such file or directory: temp/"**
-- Create temp directory: `mkdir backend/temp`
+## 🤝 Contributing
 
-**"Only PDF files are allowed"**
-- Ensure you're uploading a `.pdf` file
+Contributions welcome! Please feel free to submit issues or pull requests.
 
-## Next Steps
+## 📝 License
 
-1. ✅ Run verification script with your phone bill
-2. ✅ Review parsing quality
-3. ✅ Start backend API if verification passes
-4. ✅ Integrate with your React UI
-5. ✅ Test end-to-end flow
+MIT License - see LICENSE file for details
 
-## Questions?
+## 🙏 Acknowledgments
 
-Run the verification script first - that's the most important step to validate this approach will work better than pdf-parse!
+- [LlamaIndex](https://www.llamaindex.ai/) for LlamaParse
+- [OpenAI](https://openai.com/) for GPT-4o-mini
+- [Radix UI](https://www.radix-ui.com/) for accessible components
+- [shadcn/ui](https://ui.shadcn.com/) for beautiful UI components
+
+## ⚠️ Disclaimer
+
+This tool is designed for personal use to split shared phone bills. Always verify parsed amounts against your actual bill. Not affiliated with AT&T, T-Mobile, or Verizon.
+
+---
+
+**Made with ❤️ for easy bill splitting**

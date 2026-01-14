@@ -7,6 +7,7 @@
  */
 export interface LineItem {
   lineNumber: string; // e.g., "214.957.3190"
+  lineName: string; // e.g., "KODUMURI VAMSHI"
   total: number; // Total cost for this line
 }
 
@@ -30,4 +31,14 @@ export type UploadStatus = 'idle' | 'uploading' | 'parsing' | 'success' | 'error
 export interface ParseError {
   message: string;
   details?: string;
+}
+
+/**
+ * Group of phone lines
+ */
+export interface Group {
+  id: string;
+  name: string;
+  lineNumbers: string[];
+  color?: string;
 }

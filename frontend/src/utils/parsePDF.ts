@@ -41,12 +41,12 @@ export async function parsePDF(file: File): Promise<ParsedBill> {
     }
 
     const data: BackendResponse = await response.json()
-    console.log('✅ Backend response data:', data)
 
     // Transform backend response to frontend format
     const parsedBill: ParsedBill = {
       lines: data.lines.map(line => ({
         lineNumber: line.phone_number,
+        lineName: line.line_name,
         total: line.amount_owed,
       })),
       totalAmount: data.total_amount,
