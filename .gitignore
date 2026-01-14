@@ -41,3 +41,6 @@ coverage
 .cache
 .parcel-cache
 .turbo
+
+# bun
+bun.lockb
