@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { UploadZone } from '@/components/UploadZone';
 import { ResultsTable } from '@/components/ResultsTable';
-import { parseBillPDF } from '@/utils/parsePDF';
+import { GroupsView } from '@/components/GroupsView';
+import { parsePDF } from '@/utils/parsePDF';
 import type { ParsedBill, UploadStatus } from '@/types/bill.types';
 import { Button } from '@/components/ui/button';
+
+type ViewMode = 'table' | 'groups';
 
 function App() {
   const [status, setStatus] = useState<UploadStatus>('idle');
   const [parsedBill, setParsedBill] = useState<ParsedBill | null>(null);
   const [error, setError] = useState<string>('');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   const handleFileSelect = async (file: File) => {
     setStatus('uploading');
@@ -19,7 +23,7 @@ function App() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setStatus('parsing');
-      const bill = await parseBillPDF(file);
+      const bill = await parsePDF(file);
 
       setParsedBill(bill);
       setStatus('success');
@@ -49,12 +53,37 @@ function App() {
         <main className="space-y-8">
           {status === 'success' && parsedBill ? (
             <>
-              <div className="flex justify-center">
+              {/* Action buttons */}
+              <div className="flex justify-center gap-4">
                 <Button onClick={handleReset} variant="outline">
                   Upload Another Bill
                 </Button>
               </div>
-              <ResultsTable bill={parsedBill} />
+
+              {/* View toggle buttons */}
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => setViewMode('table')}
+                  variant={viewMode === 'table' ? 'default' : 'outline'}
+                  className="min-w-[120px]"
+                >
+                  All Lines
+                </Button>
+                <Button
+                  onClick={() => setViewMode('groups')}
+                  variant={viewMode === 'groups' ? 'default' : 'outline'}
+                  className="min-w-[120px]"
+                >
+                  Groups
+                </Button>
+              </div>
+
+              {/* Conditional view rendering */}
+              {viewMode === 'table' ? (
+                <ResultsTable bill={parsedBill} />
+              ) : (
+                <GroupsView bill={parsedBill} />
+              )}
             </>
           ) : (
             <UploadZone
