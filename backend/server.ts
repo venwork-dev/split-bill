@@ -46,22 +46,8 @@ const upload = multer({
 });
 
 // Middleware - CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173', // Local development
-  process.env.FRONTEND_URL || 'https://splitbill-frontend.onrender.com'
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, Postman, curl)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
-    }
-  },
-  credentials: true
-}));
+// Allow all origins for single-service deployment (frontend served from same domain)
+app.use(cors());
 app.use(express.json());
 
 // Serve static files from frontend build (for single-service deployment)
