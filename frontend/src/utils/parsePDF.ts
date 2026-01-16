@@ -4,8 +4,9 @@
 
 import type { ParsedBill } from '@/types/bill.types'
 
-// Use relative URL in production (same domain), localhost in development
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+// Use empty string (relative URL) in production, localhost in development
+// In production, '' means same domain (e.g., /api/extract on https://split-bill.onrender.com)
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 interface BackendResponse {
   total_amount: number
