@@ -4,7 +4,8 @@
 
 import type { ParsedBill } from '@/types/bill.types'
 
-const API_URL = 'http://localhost:3001'
+// Use relative URL in production (same domain), localhost in development
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 interface BackendResponse {
   total_amount: number

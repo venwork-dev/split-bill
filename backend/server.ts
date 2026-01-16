@@ -9,6 +9,12 @@ import cors from "cors";
 import * as dotenv from "dotenv";
 import { promises as fs } from "fs";
 import { LlamaExtract } from "llama-cloud-services";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// ES module dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -39,9 +45,28 @@ const upload = multer({
   })
 });
 
-// Middleware
-app.use(cors());
+// Middleware - CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173', // Local development
+  process.env.FRONTEND_URL || 'https://splitbill-frontend.onrender.com'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS. Origin: ${origin}`));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
+
+// Serve static files from frontend build (for single-service deployment)
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
 
 // Types
 interface PhoneLine {
@@ -110,7 +135,7 @@ app.get("/health", (req: Request, res: Response) => {
   });
 });
 
-// Extract endpoint
+// API Routes (must come before catch-all)
 app.post("/api/extract", upload.single("file"), async (req: Request, res: Response) => {
   let uploadedFilePath: string | undefined;
 
@@ -162,6 +187,11 @@ app.post("/api/extract", upload.single("file"), async (req: Request, res: Respon
       error: error instanceof Error ? error.message : "An unknown error occurred"
     });
   }
+});
+
+// Catch-all route: serve index.html for client-side routing (MUST be last)
+app.get('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Start server
