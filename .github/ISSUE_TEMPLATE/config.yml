@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Give Feedback
+    url: https://github.com/venwork-dev/split-bill/issues/new?labels=feedback&template=feedback.md
+    about: Share your experience using SplitBill
+  - name: Documentation
+    url: https://github.com/venwork-dev/split-bill#readme
+    about: Read the docs before opening an issue

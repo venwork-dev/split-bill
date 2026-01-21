@@ -12,6 +12,20 @@
 
 A modern web application that parses AT&T phone bills (PDF) and splits charges by line with intelligent grouping capabilities. Perfect for families, roommates, or businesses sharing phone plans.
 
+![Demo](./screenshots/demo.gif)
+*Add your demo GIF here once created*
+
+## 🎯 Try It Out
+
+**🎭 [Try Demo Mode](https://split-bill-twvt.onrender.com/demo)** - Explore the app with sample data (no bill upload required)
+
+**🚀 Use Live App:** [[Split Bill](https://split-bill-twvt.onrender.com/)] - Upload your actual AT&T bill
+
+**📚 Documentation:**
+- [❓ FAQ](./FAQ.md) - Common questions answered
+- [📖 Usage Guide](./USAGE_GUIDE.md) - Detailed feature walkthrough
+- [💬 Give Feedback](https://github.com/venwork-dev/split-bill/issues/new?labels=feedback&template=feedback.md) - Share your thoughts!
+
 ## ✨ Features
 
 - 📄 **Smart PDF Parsing** - Upload AT&T bills and extract line items automatically
@@ -65,42 +79,13 @@ split-bill/
 - **AI Processing:** OpenAI GPT-4o-mini
 - **File Upload:** Multer
 
-## 📦 Installation
+## 🎯 How It Works
 
-### Prerequisites
-- Bun 1.3+ (recommended) or Node.js 22+
-- API Keys:
-  - [LlamaCloud API Key](https://cloud.llamaindex.ai)
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd split-bill
-   ```
-
-2. **Set up Backend**
-   ```bash
-   cd backend
-   bun install
-   cp .env.example .env
-   # Edit .env and add your API keys
-   mkdir temp
-   bun run dev
-   ```
-   Backend runs on `http://localhost:3001`
-
-3. **Set up Frontend** (in a new terminal)
-   ```bash
-   cd frontend
-   bun install
-   bun run dev
-   ```
-   Frontend runs on `http://localhost:5173`
-
-4. **Open in browser**
-   Navigate to `http://localhost:5173`
+1. **Upload Bill** - Drop your AT&T PDF bill into the app
+2. **AI Parsing** - Our AI extracts phone line details automatically
+3. **Create Groups** - Organize lines into custom groups (Family, Work, etc.)
+4. **View Totals** - See exactly how much each group owes
+5. **Manage** - Edit, rename, or delete groups as needed
 
 ## 📖 Usage
 
@@ -159,44 +144,18 @@ For typical usage (1-2 bills per month):
 }
 ```
 
-## 🧪 Development
+## 📚 Additional Resources
 
-### Frontend Development
-```bash
-cd frontend
-bun run dev        # Start dev server
-bun run build      # Production build
-bun run preview    # Preview production build
-bun run type-check # TypeScript validation
-```
+- [📖 Usage Guide](./USAGE_GUIDE.md) - Detailed feature walkthrough with examples
+- [❓ FAQ](./FAQ.md) - Frequently asked questions
 
-### Backend Development
-```bash
-cd backend
-bun run dev        # Start with hot reload
-bun run start      # Start production server
-```
+## 💬 Support & Feedback
 
-### Testing Parser Quality
-```bash
-cd test-scripts
-bun install
-cp .env.example .env
-# Add your LLAMA_CLOUD_API_KEY
-bun test
-# Review llamaparse_output.txt
-```
+Have questions or feedback? We'd love to hear from you!
 
-## 📚 Documentation
-
-- [Frontend README](./frontend/README.md) - Frontend architecture and components
-- [Backend README](./backend/README.md) - API endpoints and parsing logic
-- [Grouping Feature](./GROUPING_FEATURE.md) - Technical details of grouping feature
-- [Usage Guide](./USAGE_GUIDE.md) - Detailed user guide with examples
-
-## 🤝 Contributing
-
-Contributions welcome! Please feel free to submit issues or pull requests.
+- **Report Issues:** Found a bug? [Let us know](https://github.com/venwork-dev/split-bill/issues/new)
+- **Feature Requests:** Have an idea? [Share it with us](https://github.com/venwork-dev/split-bill/issues/new?labels=enhancement)
+- **Feedback:** [Tell us about your experience](https://github.com/venwork-dev/split-bill/issues/new?labels=feedback&template=feedback.md)
 
 ## 📝 License
 
