@@ -12,9 +12,6 @@
 
 A modern web application that parses AT&T phone bills (PDF) and splits charges by line with intelligent grouping capabilities. Perfect for families, roommates, or businesses sharing phone plans.
 
-![Demo](./screenshots/demo.gif)
-*Add your demo GIF here once created*
-
 ## 🎯 Try It Out
 
 **🎭 [Try Demo Mode](https://split-bill-twvt.onrender.com/demo)** - Explore the app with sample data (no bill upload required)
