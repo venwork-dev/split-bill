@@ -16,6 +16,7 @@ const GROUP_COLORS = [
 
 interface GroupStore {
   groups: Group[];
+  setGroups: (groups: Group[]) => void;
   createGroup: (name: string, lineNumbers: string[]) => Group;
   updateGroup: (id: string, updates: Partial<Omit<Group, 'id'>>) => void;
   deleteGroup: (id: string) => void;
@@ -30,6 +31,17 @@ export const useGroupStore = create<GroupStore>()(
   persist(
     (set, get) => ({
       groups: [],
+
+      setGroups: (groups) => {
+        // Clear localStorage if setting demo groups (they shouldn't persist)
+        const isDemoGroups = groups.some(g => g.id.startsWith('demo-group-'));
+        if (isDemoGroups) {
+          // Don't persist demo groups - just set in memory
+          set({ groups });
+          return;
+        }
+        set({ groups });
+      },
 
       createGroup: (name, lineNumbers) => {
         const newGroup: Group = {
