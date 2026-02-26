@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Run BundleCheck
         id: audit
-        uses: venwork-dev/bundlecheck-audit-action@v0.1.0
+        uses: venwork-dev/bundlecheck-audit-action@v0.2.0
         with:
           api_key: ${{ secrets.BUNDLECHECK_API_KEY }}
           packages: |
