@@ -1,0 +1,34 @@
+name: BundleCheck PR Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  bundlecheck:
+    name: bundlecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run BundleCheck
+        id: audit
+        uses: venwork-dev/bundlecheck-audit-action@v0.1.0
+        with:
+          api_key: ${{ secrets.BUNDLECHECK_API_KEY }}
+          packages: |
+            react@18.2.0
+            axios@1.6.7
+          per_package_gzip: 50000
+          total_gzip: 120000
+          fail_on_violation: true
+          fail_on_partial: true
+          warn_only: false
+
+      - name: Assert outputs exist
+        run: |
+          test -n "${{ steps.audit.outputs.pass }}"
+          test "${{ steps.audit.outputs.total_gzip }}" -ge 0
