@@ -1,6 +1,6 @@
 /**
  * Phone Bill Parser Backend API
- * Extracts phone line details from AT&T PDF bills using LlamaExtract
+ * Extracts phone line details from AT&T PDF bills using pdf-parse + regex
  */
 
 import express, { Request, Response } from "express";
@@ -8,7 +8,7 @@ import multer from "multer";
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { promises as fs } from "fs";
-import { LlamaExtract } from "llama-cloud-services";
+import { PDFParse } from "pdf-parse";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -55,16 +55,6 @@ const frontendDistPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDistPath));
 
 // Types
-interface PhoneLine {
-  number: string;
-  user: string;
-  total: number;
-}
-
-interface ExtractionResult {
-  service_activity_lines: PhoneLine[];
-}
-
 interface BillData {
   total_amount: number;
   line_count: number;
@@ -76,41 +66,71 @@ interface BillData {
 }
 
 /**
- * Extract phone bill data using LlamaExtract agent
+ * Extract phone bill data from AT&T PDF using regex parsing.
+ *
+ * Strategy:
+ *   1. Pull full names from section headers — "Phone, XXX.XXX.XXXX\nFULL NAME"
+ *      (the page 2 summary table truncates names like "NAVEEN KUMAR ...")
+ *   2. Pull totals from the unique "Total for XXX.XXX.XXXX  $XX.XX" lines
+ *      (appears exactly once per line, no duplicates possible)
+ *   3. Join on phone number
+ *   4. Sanity check: sum of line totals must match "Total for Wireless $X"
  */
 async function extractPhoneBill(filePath: string): Promise<BillData> {
-  // Initialize LlamaExtract client (reads LLAMA_CLOUD_API_KEY from env)
-  const extractor = new LlamaExtract();
+  const buffer = await fs.readFile(filePath);
+  const parser = new PDFParse({ data: buffer });
+  const { text } = await parser.getText();
 
-  // Get the extraction agent by name
-  const agent = await extractor.getAgent("att bill extract");
-  if (!agent) {
-    throw new Error("Extraction agent 'att bill extract' not found");
+  // Step 1: phone → full name
+  // Matches "Phone, 214.957.3190\nKODUMURI VAMSHI" and "Wearable, 945.214.5965\nAPPLE WATCH"
+  const nameMap = new Map<string, string>();
+  const headerRegex = /(?:Phone|Wearable),\s+(\d{3}\.\d{3}\.\d{4})\s*\n\s*([A-Z][A-Z ]+)/g;
+  let match: RegExpExecArray | null;
+  while ((match = headerRegex.exec(text)) !== null) {
+    nameMap.set(match[1], match[2].trim());
   }
 
-  // Run extraction
-  const result = await agent.extract(filePath);
-
-  // Type guard to safely extract the data
-  const data = result?.data as unknown;
-  if (!data || typeof data !== 'object' || !('service_activity_lines' in data)) {
-    throw new Error("No service activity lines found in extraction result");
+  // Step 2: phone → total
+  // Matches "Total for 214.957.3190    $76.58" — appears exactly once per line
+  const totalMap = new Map<string, number>();
+  const totalRegex = /Total for (\d{3}\.\d{3}\.\d{4})\s+\$([0-9,]+\.\d{2})/g;
+  while ((match = totalRegex.exec(text)) !== null) {
+    totalMap.set(match[1], parseFloat(match[2].replace(/,/g, '')));
   }
 
-  const extractedData = data as ExtractionResult;
+  if (totalMap.size === 0) {
+    throw new Error(
+      "No line totals found in the PDF. " +
+      "Make sure this is an AT&T wireless bill — other bill formats are not supported yet."
+    );
+  }
 
-  // Transform to desired format
-  const billData: BillData = {
-    total_amount: extractedData.service_activity_lines.reduce((sum, line) => sum + line.total, 0),
-    line_count: extractedData.service_activity_lines.length,
-    lines: extractedData.service_activity_lines.map(line => ({
-      phone_number: line.number,
-      line_name: line.user,
-      amount_owed: line.total
-    }))
+  // Step 3: build line items, join name + total on phone number
+  const lines = Array.from(totalMap.entries()).map(([phone, amount]) => ({
+    phone_number: phone,
+    line_name: nameMap.get(phone) ?? "Unknown",
+    amount_owed: amount,
+  }));
+
+  // Step 4: sanity check — line totals must sum to the wireless section total
+  const lineSum = Math.round(lines.reduce((sum, l) => sum + l.amount_owed, 0) * 100) / 100;
+  const wirelessMatch = text.match(/Total for Wireless\s+\$([0-9,]+\.\d{2})/);
+  if (wirelessMatch) {
+    const wirelessTotal = parseFloat(wirelessMatch[1].replace(/,/g, ''));
+    if (Math.abs(lineSum - wirelessTotal) > 0.02) {
+      throw new Error(
+        `Parse validation failed: line totals sum ($${lineSum.toFixed(2)}) ` +
+        `does not match wireless total ($${wirelessTotal.toFixed(2)}). ` +
+        "The bill may have an unsupported charge type — please verify manually."
+      );
+    }
+  }
+
+  return {
+    total_amount: lineSum,
+    line_count: lines.length,
+    lines,
   };
-
-  return billData;
 }
 
 // Health check endpoint
@@ -126,13 +146,6 @@ app.post("/api/extract", upload.single("file"), async (req: Request, res: Respon
   let uploadedFilePath: string | undefined;
 
   try {
-    // Validate API key
-    if (!process.env.LLAMA_CLOUD_API_KEY) {
-      return res.status(500).json({
-        error: "Server configuration error: LLAMA_CLOUD_API_KEY not set"
-      });
-    }
-
     // Validate file upload
     if (!req.file) {
       return res.status(400).json({

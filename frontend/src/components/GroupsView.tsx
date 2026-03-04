@@ -14,6 +14,7 @@ import type { ParsedBill } from '@/types/bill.types';
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Edit2, Trash2, Users, TrendingUp, DollarSign } from 'lucide-react';
 import { useGroupStore } from '@/stores/groupStore';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface GroupsViewProps {
   bill: ParsedBill;
@@ -32,13 +33,6 @@ export function GroupsView({ bill }: GroupsViewProps) {
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState<string | null>(null);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   const toggleGroup = (groupId: string) => {
     const newExpanded = new Set(expandedGroups);
@@ -125,8 +119,8 @@ export function GroupsView({ bill }: GroupsViewProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Statistics Cards — hidden in print */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
         <Card className="border-gray-200">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -196,9 +190,10 @@ export function GroupsView({ bill }: GroupsViewProps) {
                 <div className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
+                      {/* Expand/collapse toggle — hidden in print */}
                       <button
                         onClick={() => toggleGroup(group.id)}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        className="p-1 hover:bg-gray-200 rounded transition-colors print:hidden"
                       >
                         {expandedGroups.has(group.id) ? (
                           <ChevronDown className="w-5 h-5 text-gray-500" />
@@ -246,8 +241,9 @@ export function GroupsView({ bill }: GroupsViewProps) {
                       <div className="text-xl font-bold text-gray-900 tabular-nums">
                         {formatCurrency(group.total)}
                       </div>
+                      {/* Edit/delete group buttons — hidden in print */}
                       {editingGroupId !== group.id && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 print:hidden">
                           <Button
                             size="sm"
                             variant="ghost"
@@ -268,55 +264,58 @@ export function GroupsView({ bill }: GroupsViewProps) {
                   </div>
                 </div>
 
-                {/* Group Lines (expandable) */}
-                {expandedGroups.has(group.id) && (
-                  <div className="bg-gray-50">
-                    {group.lines.map((line, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between px-6 py-3 pl-14 border-t border-gray-100 group/line"
-                      >
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900">
-                            {line.lineName}
-                          </div>
-                          <div className="font-mono text-sm text-gray-500">
-                            {line.lineNumber}
-                          </div>
+                {/* Group Lines — always rendered; hidden on screen when collapsed, always visible in print */}
+                <div className={expandedGroups.has(group.id) ? 'bg-gray-50' : 'hidden print:!block bg-gray-50'}>
+                  {group.lines.map((line, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between px-6 py-3 pl-14 border-t border-gray-100 group/line"
+                    >
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">
+                          {line.lineName}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-sm font-semibold text-gray-900 tabular-nums">
-                            {formatCurrency(line.total)}
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="opacity-0 group-hover/line:opacity-100 transition-opacity"
-                            onClick={() => handleRemoveLine(group.id, line.lineNumber)}
-                          >
-                            <Trash2 className="w-3 h-3 text-gray-400" />
-                          </Button>
+                        <div className="font-mono text-sm text-gray-500">
+                          {line.lineNumber}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="flex items-center gap-3">
+                        <div className="text-sm font-semibold text-gray-900 tabular-nums">
+                          {formatCurrency(line.total)}
+                        </div>
+                        {/* Remove-from-group button — hidden in print */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="opacity-0 group-hover/line:opacity-100 transition-opacity print:hidden"
+                          onClick={() => handleRemoveLine(group.id, line.lineNumber)}
+                        >
+                          <Trash2 className="w-3 h-3 text-gray-400" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
 
             {/* Ungrouped Lines */}
             {ungroupedLines.length > 0 && (
               <div>
-                <button
-                  onClick={() => toggleGroup('ungrouped')}
-                  className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
-                >
+                {/* Ungrouped header row */}
+                <div className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    {expandedGroups.has('ungrouped') ? (
-                      <ChevronDown className="w-5 h-5 text-gray-500" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-500" />
-                    )}
+                    {/* Expand/collapse toggle — hidden in print */}
+                    <button
+                      onClick={() => toggleGroup('ungrouped')}
+                      className="print:hidden"
+                    >
+                      {expandedGroups.has('ungrouped') ? (
+                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
                     <span className="text-lg font-semibold text-gray-500">
                       Ungrouped
                     </span>
@@ -327,30 +326,29 @@ export function GroupsView({ bill }: GroupsViewProps) {
                   <div className="text-xl font-bold text-gray-700 tabular-nums">
                     {formatCurrency(ungroupedTotal)}
                   </div>
-                </button>
+                </div>
 
-                {expandedGroups.has('ungrouped') && (
-                  <div className="bg-gray-50">
-                    {ungroupedLines.map((line, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between px-6 py-3 pl-14 border-t border-gray-100"
-                      >
-                        <div>
-                          <div className="font-semibold text-gray-700">
-                            {line.lineName}
-                          </div>
-                          <div className="font-mono text-sm text-gray-500">
-                            {line.lineNumber}
-                          </div>
+                {/* Ungrouped lines — always rendered; hidden on screen when collapsed, always visible in print */}
+                <div className={expandedGroups.has('ungrouped') ? 'bg-gray-50' : 'hidden print:!block bg-gray-50'}>
+                  {ungroupedLines.map((line, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between px-6 py-3 pl-14 border-t border-gray-100"
+                    >
+                      <div>
+                        <div className="font-semibold text-gray-700">
+                          {line.lineName}
                         </div>
-                        <div className="text-sm font-semibold text-gray-900 tabular-nums">
-                          {formatCurrency(line.total)}
+                        <div className="font-mono text-sm text-gray-500">
+                          {line.lineNumber}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="text-sm font-semibold text-gray-900 tabular-nums">
+                        {formatCurrency(line.total)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

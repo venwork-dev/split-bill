@@ -1,0 +1,14 @@
+{
+  "name": "split-bill",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "sh -c 'trap \"kill 0\" EXIT; bun run --cwd backend dev & bun run --cwd frontend dev & wait'",
+    "dev:backend": "bun run --cwd backend dev",
+    "dev:frontend": "bun run --cwd frontend dev",
+    "build": "bash build.sh",
+    "start": "bun run --cwd backend start",
+    "install": "bun install --cwd backend && bun install --cwd frontend",
+    "type-check": "bun run --cwd frontend type-check"
+  }
+}

@@ -15,6 +15,7 @@ import type { ParsedBill } from '@/types/bill.types';
 import { useState } from 'react';
 import { Plus, Users } from 'lucide-react';
 import { useGroupStore } from '@/stores/groupStore';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 interface ResultsTableProps {
   bill: ParsedBill;
@@ -26,13 +27,6 @@ export function ResultsTable({ bill }: ResultsTableProps) {
   const [groupName, setGroupName] = useState('');
   const createGroup = useGroupStore((state) => state.createGroup);
   const getGroupForLine = useGroupStore((state) => state.getGroupForLine);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   const toggleLineSelection = (lineNumber: string) => {
     const newSelection = new Set(selectedLines);
@@ -67,9 +61,9 @@ export function ResultsTable({ bill }: ResultsTableProps) {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      {/* Selection Controls */}
+      {/* Selection Controls — hidden in print */}
       {bill.lines.length > 0 && (
-        <div className="mb-4 flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3">
+        <div className="mb-4 flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3 print:hidden">
           <div className="flex items-center gap-3">
             <Users className="w-5 h-5 text-gray-500" />
             <span className="text-sm font-medium text-gray-700">
@@ -128,11 +122,11 @@ export function ResultsTable({ bill }: ResultsTableProps) {
                   key={index}
                   className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors"
                 >
-                  {/* Checkbox for grouping functionality */}
+                  {/* Checkbox for grouping — hidden in print */}
                   <Checkbox
                     checked={selectedLines.has(line.lineNumber)}
                     onCheckedChange={() => toggleLineSelection(line.lineNumber)}
-                    className="border-gray-300"
+                    className="border-gray-300 print:hidden"
                   />
 
                   {/* Line Info */}
