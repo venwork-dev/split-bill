@@ -19,12 +19,6 @@ interface BackendResponse {
 }
 
 export async function parsePDF(file: File): Promise<ParsedBill> {
-  console.log('📤 Uploading PDF to backend...', {
-    fileName: file.name,
-    fileSize: `${(file.size / 1024).toFixed(2)} KB`,
-    fileType: file.type,
-  })
-
   const formData = new FormData()
   formData.append('file', file)
 
@@ -34,11 +28,8 @@ export async function parsePDF(file: File): Promise<ParsedBill> {
       body: formData,
     })
 
-    console.log('📥 Backend response status:', response.status, response.statusText)
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-      console.error('❌ Backend error:', errorData)
       throw new Error(errorData.error || `Server error: ${response.status}`)
     }
 
@@ -54,14 +45,8 @@ export async function parsePDF(file: File): Promise<ParsedBill> {
       totalAmount: data.total_amount,
     }
 
-    console.log('📊 Parsed bill:', {
-      totalLines: parsedBill.lines.length,
-      totalAmount: `$${parsedBill.totalAmount.toFixed(2)}`,
-    })
-
     return parsedBill
   } catch (error) {
-    console.error('❌ Error calling backend:', error)
     throw error
   }
 }

@@ -131,3 +131,30 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: A4;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    background: white !important;
+    font-size: 11pt;
+  }
+
+  /* Strip shadows from cards */
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  /* Remove hover backgrounds from list rows */
+  .hover\:bg-gray-50:hover {
+    background-color: transparent !important;
+  }
+}
