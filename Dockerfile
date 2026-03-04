@@ -32,8 +32,8 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
-# Uploads dir for temporary PDF processing
-RUN mkdir -p /app/backend/uploads
+# Uploads dir for temporary PDF processing (multer writes relative to CWD /app)
+RUN mkdir -p /app/uploads
 
 EXPOSE 8080
 

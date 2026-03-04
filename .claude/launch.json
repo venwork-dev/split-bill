@@ -4,7 +4,7 @@
     {
       "name": "frontend",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["run", "dev:frontend"],
       "port": 5173
     }
   ]

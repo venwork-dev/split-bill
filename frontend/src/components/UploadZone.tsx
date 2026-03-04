@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield } from 'lucide-react';
 import type { UploadStatus } from '@/types/bill.types';
 
 interface UploadZoneProps {
@@ -56,6 +57,16 @@ export function UploadZone({ onFileSelect, status, error }: UploadZoneProps) {
   );
 
   const isLoading = status === 'uploading' || status === 'parsing';
+  const [showColdStartHint, setShowColdStartHint] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setShowColdStartHint(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowColdStartHint(true), 4000);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4">
@@ -116,9 +127,23 @@ export function UploadZone({ onFileSelect, status, error }: UploadZoneProps) {
             </Button>
           </label>
 
-          <p className="text-xs text-gray-400">PDF files only, up to 10MB</p>
+          <p className="text-xs text-gray-500">PDF files only, up to 10MB</p>
+
+          {showColdStartHint && (
+            <p className="text-xs text-amber-600 animate-pulse">
+              Taking a moment… the server may be waking up from idle.
+            </p>
+          )}
         </div>
       </div>
+
+      {/* Privacy notice */}
+      {!isLoading && (
+        <div className="flex items-center justify-center gap-1.5 text-xs text-gray-500">
+          <Shield className="w-3 h-3" />
+          <span>Your PDF is processed on our server and immediately deleted. We never store your bill data.</span>
+        </div>
+      )}
 
       {error && (
         <Alert variant="destructive">

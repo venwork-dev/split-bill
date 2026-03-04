@@ -100,8 +100,7 @@ async function extractPhoneBill(filePath: string): Promise<BillData> {
 
   if (totalMap.size === 0) {
     throw new Error(
-      "No line totals found in the PDF. " +
-      "Make sure this is an AT&T wireless bill — other bill formats are not supported yet."
+      "Couldn't read this bill. Make sure you're uploading a full AT&T wireless bill PDF, not a payment receipt or summary page."
     );
   }
 

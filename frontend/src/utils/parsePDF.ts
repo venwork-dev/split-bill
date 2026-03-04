@@ -5,7 +5,7 @@
 import type { ParsedBill } from '@/types/bill.types'
 
 // Use empty string (relative URL) in production, localhost in development
-// In production, '' means same domain (e.g., /api/extract on https://split-bill.onrender.com)
+// In production, '' means same domain (e.g., /api/extract on https://split-bill-vmet8g.fly.dev)
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '')
 
 interface BackendResponse {
@@ -47,6 +47,9 @@ export async function parsePDF(file: File): Promise<ParsedBill> {
 
     return parsedBill
   } catch (error) {
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      throw new Error('Could not reach the server. It may be starting up — please wait a moment and try again.')
+    }
     throw error
   }
 }
