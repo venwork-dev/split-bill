@@ -194,11 +194,11 @@ app.get('*', (req: Request, res: Response) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log("=".repeat(60));
   console.log(`🚀 Phone Bill Parser API`);
   console.log("=".repeat(60));
-  console.log(`\n📍 Server running on: http://localhost:${PORT}`);
+  console.log(`\n📍 Server running on: http://0.0.0.0:${PORT}`);
   console.log(`\n📋 Endpoints:`);
   console.log(`   GET  /health          - Health check`);
   console.log(`   POST /api/extract     - Extract phone bill data (PDF upload)`);
